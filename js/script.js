@@ -17,6 +17,7 @@ function logOutput(message) {
 let tagToMutate = document.getElementById("Tag").value;
 let parameterToMutate = document.getElementById("Parameter").value;
 let parameterValue = document.getElementById("ParameterValue").value;
+let parameterValueInit = document.getElementById("ParameterValueInit").value;
 
 // Add event listener for input parameters
 let allInputDOMElements = document.querySelectorAll(".dimension_box");
@@ -29,6 +30,7 @@ function getInputParameters() {
   tagToMutate = document.getElementById("Tag").value;
   parameterToMutate = document.getElementById("Parameter").value;
   parameterValue = document.getElementById("ParameterValue").value;
+  parameterValueInit = document.getElementById("ParameterValueInit").value;
   //console.log(tagToMutate,parameterToMutate,parameterValue);
 }
 
@@ -81,9 +83,19 @@ function getAllXamlFiles(zip) {
             i < xmlDoc.getElementsByTagName(tagToMutate).length;
             i++
           ) {
-            xmlDoc
-              .getElementsByTagName(tagToMutate)
-              [i].setAttribute(parameterToMutate, parameterValue);
+            if (
+              xmlDoc
+                .getElementsByTagName(tagToMutate)
+                [i].getAttribute("AssetName") == '[row("Asset").ToString]'
+            ) {
+              xmlDoc
+                .getElementsByTagName(tagToMutate)
+                [i].setAttribute(parameterToMutate, parameterValueInit);
+            } else {
+              xmlDoc
+                .getElementsByTagName(tagToMutate)
+                [i].setAttribute(parameterToMutate, parameterValue);
+            }
 
             // Log the tag that has been mutated
             console.log(xmlDoc.getElementsByTagName(tagToMutate)[i]);
