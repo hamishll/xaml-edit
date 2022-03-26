@@ -1,0 +1,60 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Edit XAML Parameters in .nupkg</title>
+  <meta name="description" content="Should you? Probably not">
+  <meta name="author" content="HL">
+  <!--<link rel="stylesheet" href="css/responsive.css"> -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="js/jszip.min.js"></script>
+  <!-- <script type="text/javascript" src="js/jszip-utils/dist/jszip-utils.js"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet"> 
+  <link rel="stylesheet" href="css/styles.css">
+<meta name="viewport" content="width=device-width">
+
+
+</head>
+
+<body>
+  <div id="header">
+    <h2>Edit XAML Parameters in .nupkg</h2>
+  </div>
+  <div id="container">
+    <div id="dimensions_container">
+      <!-- <h3>Enter your crop dimensions</h3> -->
+      <div class="card">
+        <h2>Tag to mutate</h2>
+        <span></span>
+        <textarea class="dimension_box" id="Tag">ui:GetRobotAsset</textarea>
+      </div>
+      <div class="card">
+        <h2>Parameter to mutate</h2>
+        <span></span>
+        <textarea class="dimension_box" id="Parameter">FolderPath</textarea>
+      </div>
+      <div class="card">
+        <h2>New value for parameter</h2>
+        <span></span>
+        <textarea class="dimension_box" id="ParameterValue">[row(&quot;OrchestratorAssetFolder&quot;).ToString]</textarea>
+      </div>
+    </div>
+
+    <div>
+      <label for="input" class="custom-file-upload">Select .nupkg</label>
+      <input id="input" type="file"/>
+      <button  class="custom-file-upload" onmousedown="pressExport()" onclick="exportAll()">Export</button>
+    </div>
+    <h1>Check the console log to see better logs</h1>
+    <div id="logOutput">
+      <!-- CONSOLE LOG OUTPUT HERE FOR REFERENCE -->
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
