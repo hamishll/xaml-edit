@@ -111,7 +111,7 @@ function pressExport() {}
 function exportAll() {
   zip.generateAsync({ type: "blob" }).then(function (content) {
     // see FileSaver.js
-    saveAs(content, nupkgName + ".zip"); //Remove the .zip later
+    saveAs(content, nupkgName); //Remove the .zip later
   });
 }
 
