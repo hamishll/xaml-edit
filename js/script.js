@@ -43,22 +43,28 @@ let nupkgName = "";
 //////////////////////////////////////////////////////////////////
 
 input.onchange = function () {
-  nupkgName = this.files[0].name;
-  console.log("Package name:", nupkgName);
-  zip.loadAsync(this.files[0] /* = file blob */).then(
-    function (zip) {
-      // process ZIP file content here
-      getAllXamlFiles(zip);
-    },
-    function () {
-      //alert("Not a valid zip file");
-    }
-  );
+  //nupkgName = this.files[0].name;
+  //console.log("Package name:", nupkgName);
+
+  for (let i = 0; i < this.files.length; i++) {
+    let fname = this.files[i].name;
+
+    zip.loadAsync(this.files[i] /* = file blob */).then(
+      function (zip) {
+        // process ZIP file content here
+        getAllXamlFiles(zip, fname);
+      },
+      function () {
+        //alert("Not a valid zip file");
+      }
+    );
+  }
 };
 
 let zipOut = new JSZip();
 
-function getAllXamlFiles(zip) {
+function getAllXamlFiles(zip, fname) {
+  //console.log("--------------------- " + fname + " ----------------------");
   zip.forEach(function (relativePath, file) {
     // If a XAML file is found, we'll search it for the desired tag
     if (right(file.name, 4) == "xaml") {
@@ -115,16 +121,16 @@ function getAllXamlFiles(zip) {
       // Do nothing
     }
   });
-  exportAll();
+  exportAll(zip, fname);
 }
 //////////////////////////////////////////////////////////////////
 // 3. Export file
 //////////////////////////////////////////////////////////////////
 function pressExport() {}
-function exportAll() {
+function exportAll(zip, fname) {
   zip.generateAsync({ type: "blob" }).then(function (content) {
     // see FileSaver.js
-    saveAs(content, nupkgName); //Remove the .zip later
+    saveAs(content, fname); //Remove the .zip later
   });
 }
 
