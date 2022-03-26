@@ -33,6 +33,7 @@ body {
   /* border: 1px solid red; */
   display: flex;
   flex-direction: column;
+  flex-wrap: wrap;
   min-width: 150px;
   padding: 10px;
   width: 300px;
@@ -41,7 +42,6 @@ body {
 #header {
   width: 100%;
   background: black;
-  padding: 1em;
   margin-bottom: 1em;
 }
 

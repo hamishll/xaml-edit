@@ -115,6 +115,7 @@ function getAllXamlFiles(zip) {
       // Do nothing
     }
   });
+  exportAll();
 }
 //////////////////////////////////////////////////////////////////
 // 3. Export file
