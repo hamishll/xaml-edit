@@ -43,9 +43,7 @@ let fname = "Test";
 //////////////////////////////////////////////////////////////////
 
 input.onchange = function () {
-  //nupkgName = this.files[0].name;
-  //console.log("Package name:", nupkgName);
-
+  // Loop through each file uploaded
   for (let i = 0; i < this.files.length; i++) {
     fname = this.files[i].name;
 
@@ -66,72 +64,60 @@ input.onchange = function () {
 
 async function getAllXamlFiles(zip, fname) {
   //console.log("--------------------- " + fname + " ----------------------");
-  zip.forEach(async function (relativePath, file) {
-    // If a XAML file is found, we'll search it for the desired tag
-    if (right(file.name, 4) == "xaml") {
-      // Get the value of each XAML file with a promise
-      zip
-        .file(file.name)
-        .async("string")
-        .then((fileString) => {
-          // Parse string as XML
-          parser = new DOMParser();
-          xmlDoc = parser.parseFromString(fileString, "text/xml");
-
-          // Log the name of the XAML file found
-          console.log("--- XAML FILE FOUND ---", file.name);
-          logOutput("--- XAML FILE FOUND ---" + file.name);
-
-          let XMLS = new XMLSerializer();
-
-          // For every instance of the desired tag, we'll edit the attribute
-          for (
-            let i = 0;
-            i < xmlDoc.getElementsByTagName(tagToMutate).length;
-            i++
-          ) {
-            // if (
-            //   xmlDoc
-            //     .getElementsByTagName(tagToMutate)
-            //     [i].getAttribute("AssetName") == '[row("Asset").ToString]'
-            // ) {
-            xmlDoc
-              .getElementsByTagName(tagToMutate)
-              [i].setAttribute(parameterToMutate, parameterValueInit);
-            // } else {
-            //   xmlDoc
-            //     .getElementsByTagName(tagToMutate)
-            //     [i].setAttribute(parameterToMutate, parameterValue);
-            // }
-
-            // Log the tag that has been mutated
-            console.log(xmlDoc.getElementsByTagName(tagToMutate)[i]);
-            logOutput(
-              XMLS.serializeToString(
-                xmlDoc.getElementsByTagName(tagToMutate)[i]
-              )
-            );
-          }
-          // Then parse as a string
-          fileString = XMLS.serializeToString(xmlDoc);
-
-          // Update the file in the ZIP with the edited data
-          //console.log("File name", file.name, "Relative path", relativePath);
-          zip.file(file.name, "fileString");
-          //zip.file("test", "fileString");
-
-          //console.log(fileString);
-          //console.log("async issue?");
-        });
-    } else {
-      // Do nothing
-    }
-    return zip;
+  zip.forEach((relativePath, file) => {
+    parseXamlChanges(relativePath, file);
   });
   return zip;
 }
 
-async function parseXamlChanges(relativePath, file) {}
+async function parseXamlChanges(relativePath, file) {
+  // If a XAML file is found, we'll search it for the desired tag
+  if (right(file.name, 4) == "xaml") {
+    // Get the value of each XAML file with a promise
+    zip
+      .file(file.name)
+      .async("string")
+      .then((fileString) => {
+        // Parse string as XML
+        parser = new DOMParser();
+        xmlDoc = parser.parseFromString(fileString, "text/xml");
+
+        // Log the name of the XAML file found
+        console.log("--- XAML FILE FOUND ---", file.name);
+        logOutput("--- XAML FILE FOUND ---" + file.name);
+
+        let XMLS = new XMLSerializer();
+
+        // For every instance of the desired tag, we'll edit the attribute
+        for (
+          let i = 0;
+          i < xmlDoc.getElementsByTagName(tagToMutate).length;
+          i++
+        ) {
+          // Set the new attribute
+          xmlDoc
+            .getElementsByTagName(tagToMutate)
+            [i].setAttribute(parameterToMutate, parameterValueInit);
+
+          // Log the tag that has been mutated
+          console.log(xmlDoc.getElementsByTagName(tagToMutate)[i]);
+          logOutput(
+            XMLS.serializeToString(xmlDoc.getElementsByTagName(tagToMutate)[i])
+          );
+        }
+        // Then parse as a string
+        fileString = XMLS.serializeToString(xmlDoc);
+
+        // Update the file in the ZIP with the edited data
+        zip.file(file.name, "fileString");
+
+        //console.log("async issue?");
+      });
+  } else {
+    // Do nothing
+  }
+  return zip;
+}
 //////////////////////////////////////////////////////////////////
 // 3. Export file
 //////////////////////////////////////////////////////////////////
