@@ -16,7 +16,7 @@ function logOutput(message) {
 // Instantiate input parameters
 let tagToMutate = document.getElementById("Tag").value;
 let parameterToMutate = document.getElementById("Parameter").value;
-let parameterValue = document.getElementById("ParameterValue").value;
+//let parameterValue = document.getElementById("ParameterValue").value;
 let parameterValueInit = document.getElementById("ParameterValueInit").value;
 
 // Add event listener for input parameters
@@ -29,13 +29,13 @@ allInputDOMElements.forEach((item) =>
 function getInputParameters() {
   tagToMutate = document.getElementById("Tag").value;
   parameterToMutate = document.getElementById("Parameter").value;
-  parameterValue = document.getElementById("ParameterValue").value;
+  //parameterValue = document.getElementById("ParameterValue").value;
   parameterValueInit = document.getElementById("ParameterValueInit").value;
   //console.log(tagToMutate,parameterToMutate,parameterValue);
 }
 
 let zip = new JSZip();
-let nupkgName = "";
+let fname = "Test";
 //zip.file("README.md", "Test\n");
 
 //////////////////////////////////////////////////////////////////
@@ -47,12 +47,15 @@ input.onchange = function () {
   //console.log("Package name:", nupkgName);
 
   for (let i = 0; i < this.files.length; i++) {
-    let fname = this.files[i].name;
+    fname = this.files[i].name;
 
     zip.loadAsync(this.files[i] /* = file blob */).then(
-      function (zip) {
+      async function (zip) {
         // process ZIP file content here
-        getAllXamlFiles(zip, fname);
+        getAllXamlFiles(zip, fname).then((zip) => {
+          exportAll(zip, fname);
+        });
+        //exportAll(zip, fname);
       },
       function () {
         //alert("Not a valid zip file");
@@ -61,11 +64,9 @@ input.onchange = function () {
   }
 };
 
-let zipOut = new JSZip();
-
-function getAllXamlFiles(zip, fname) {
+async function getAllXamlFiles(zip, fname) {
   //console.log("--------------------- " + fname + " ----------------------");
-  zip.forEach(function (relativePath, file) {
+  zip.forEach(async function (relativePath, file) {
     // If a XAML file is found, we'll search it for the desired tag
     if (right(file.name, 4) == "xaml") {
       // Get the value of each XAML file with a promise
@@ -89,19 +90,19 @@ function getAllXamlFiles(zip, fname) {
             i < xmlDoc.getElementsByTagName(tagToMutate).length;
             i++
           ) {
-            if (
-              xmlDoc
-                .getElementsByTagName(tagToMutate)
-                [i].getAttribute("AssetName") == '[row("Asset").ToString]'
-            ) {
-              xmlDoc
-                .getElementsByTagName(tagToMutate)
-                [i].setAttribute(parameterToMutate, parameterValueInit);
-            } else {
-              xmlDoc
-                .getElementsByTagName(tagToMutate)
-                [i].setAttribute(parameterToMutate, parameterValue);
-            }
+            // if (
+            //   xmlDoc
+            //     .getElementsByTagName(tagToMutate)
+            //     [i].getAttribute("AssetName") == '[row("Asset").ToString]'
+            // ) {
+            xmlDoc
+              .getElementsByTagName(tagToMutate)
+              [i].setAttribute(parameterToMutate, parameterValueInit);
+            // } else {
+            //   xmlDoc
+            //     .getElementsByTagName(tagToMutate)
+            //     [i].setAttribute(parameterToMutate, parameterValue);
+            // }
 
             // Log the tag that has been mutated
             console.log(xmlDoc.getElementsByTagName(tagToMutate)[i]);
@@ -115,18 +116,28 @@ function getAllXamlFiles(zip, fname) {
           fileString = XMLS.serializeToString(xmlDoc);
 
           // Update the file in the ZIP with the edited data
-          zip.file(file.name, fileString);
+          //console.log("File name", file.name, "Relative path", relativePath);
+          zip.file(file.name, "fileString");
+          //zip.file("test", "fileString");
+
+          //console.log(fileString);
+          //console.log("async issue?");
         });
     } else {
       // Do nothing
     }
+    return zip;
   });
-  exportAll(zip, fname);
+  return zip;
 }
+
+async function parseXamlChanges(relativePath, file) {}
 //////////////////////////////////////////////////////////////////
 // 3. Export file
 //////////////////////////////////////////////////////////////////
-function pressExport() {}
+function pressExport() {
+  exportAll(zip, fname);
+}
 function exportAll(zip, fname) {
   zip.generateAsync({ type: "blob" }).then(function (content) {
     // see FileSaver.js

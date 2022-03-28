@@ -37,22 +37,22 @@
         <span></span>
         <textarea class="dimension_box" id="Parameter">FolderPath</textarea>
       </div>
-      <div class="card">
+      <!-- <div class="card">
         <h2>New value for parameter</h2>
         <span></span>
         <textarea class="dimension_box" id="ParameterValue">in_OrchestratorFolderPath</textarea>
-      </div>
+      </div> -->
       <div class="card">
-        <h2>New value for parameter <small>(for InitSettings specifically)</small></h2>
+        <h2>New value for parameter <small></small></h2>
         <span></span>
-        <textarea class="dimension_box" id="ParameterValueInit">[row(&quot;OrchestratorAssetFolder&quot;).ToString]</textarea>
+        <textarea class="dimension_box" id="ParameterValueInit">Shared</textarea>
       </div>
     </div>
 
     <div>
       <label for="input" class="custom-file-upload">Select .nupkg</label>
       <input id="input" type="file" multiple="multiple"/>
-      <!-- <button  class="custom-file-upload" onmousedown="pressExport()" onclick="exportAll()">Export</button> -->
+      <button  class="custom-file-upload" onclick="pressExport()">Export</button>
     </div>
     <h2>Check the console log to see better logs! </h2>
       <h2>Note system.activities must be greater than 20.10 for the folder path parameter to be accepted.</h2>
