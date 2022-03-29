@@ -71,7 +71,7 @@ async function mutateSingleNupkgFile(zip, fname) {
   // process ZIP file content here
   zip = await mutateAllXamlFiles(zip);
   // addZipToArray(zip, fname);
-  alert("mutateSingleNupkgFile returning", zip);
+  //alert("mutateSingleNupkgFile returning", zip);
   return zip;
 }
 
@@ -206,6 +206,7 @@ async function exportAll(zip, fname) {
   zip.generateAsync({ type: "blob" }).then(function (content) {
     // see FileSaver.js
     saveAs(content, fname);
+    //alert("First zip exported");
   });
 }
 
