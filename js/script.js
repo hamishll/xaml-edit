@@ -15,8 +15,8 @@ function logOutput(message) {
 
 // Instantiate input parameters
 let tagToMutate = document.getElementById("Tag").value;
+let tagToMutate2 = document.getElementById("Tag2").value;
 let parameterToMutate = document.getElementById("Parameter").value;
-//let parameterValue = document.getElementById("ParameterValue").value;
 let parameterValueInit = document.getElementById("ParameterValueInit").value;
 
 // Add event listener for input parameters
@@ -28,50 +28,73 @@ allInputDOMElements.forEach((item) =>
 // Update input parameters on event
 function getInputParameters() {
   tagToMutate = document.getElementById("Tag").value;
+  tagToMutate2 = document.getElementById("Tag2").value;
   parameterToMutate = document.getElementById("Parameter").value;
-  //parameterValue = document.getElementById("ParameterValue").value;
   parameterValueInit = document.getElementById("ParameterValueInit").value;
-  //console.log(tagToMutate,parameterToMutate,parameterValue);
 }
 
 let zip = new JSZip();
-let fname = "Test";
+let zipArray = [];
+let fname = "Initial Filename Value";
+let fnameArray = [];
 //zip.file("README.md", "Test\n");
 
 //////////////////////////////////////////////////////////////////
-// 1. Load files after file chosen
+// 1. Process files after file chosen
 //////////////////////////////////////////////////////////////////
 
 input.onchange = function () {
   // Loop through each file uploaded
   for (let i = 0; i < this.files.length; i++) {
     fname = this.files[i].name;
-
     zip.loadAsync(this.files[i] /* = file blob */).then(
-      async function (zip) {
-        // process ZIP file content here
-        getAllXamlFiles(zip, fname).then((zip) => {
-          exportAll(zip, fname);
-        });
-        //exportAll(zip, fname);
+      (zip) => {
+        //mutateSingleNupkgFile(zip).then((zip) => exportAll(zip, fname));
+        // setTimeout(() => {
+        mutateSingleNupkgFile(zip, fname).then(
+          (zip) => {
+            //alert(zip);
+            exportAll(zip, fname);
+          }
+          // addZipToArray(zip, fname)
+        );
+        // }, 1000);
       },
       function () {
-        //alert("Not a valid zip file");
+        alert("Not a valid .nupkg file");
       }
     );
   }
 };
 
-async function getAllXamlFiles(zip, fname) {
-  //console.log("--------------------- " + fname + " ----------------------");
-  zip.forEach((relativePath, file) => {
-    parseXamlChanges(relativePath, file);
-  });
+async function mutateSingleNupkgFile(zip, fname) {
+  // process ZIP file content here
+  zip = await mutateAllXamlFiles(zip);
+  // addZipToArray(zip, fname);
+  alert("mutateSingleNupkgFile returning", zip);
   return zip;
 }
 
-async function parseXamlChanges(relativePath, file) {
+async function mutateAllXamlFiles(zip) {
+  console.log("--------------------- " + fname + " ----------------------");
+  console.log(zip);
+
+  // This loop isn't awaiting all promises before returning
+  for await (const [index, file] of Object.entries(zip.files)) {
+    zip = await mutateSingleXamlFile(index, file);
+  }
+
+  // zip.forEach(async (relativePath, file) => {
+  //   mutateSingleXamlFile(relativePath, file);
+  // });
+  //alert("mutateAllXamlFiles returning", zip);
+  return zip;
+}
+
+async function mutateSingleXamlFile(relativePath, file) {
+  //console.log(relativePath, file);
   // If a XAML file is found, we'll search it for the desired tag
+  // console.log(file, file.files);
   if (right(file.name, 4) == "xaml") {
     // Get the value of each XAML file with a promise
     zip
@@ -94,7 +117,7 @@ async function parseXamlChanges(relativePath, file) {
           i < xmlDoc.getElementsByTagName(tagToMutate).length;
           i++
         ) {
-          // Set the new attribute
+          // Set the new attributes
           xmlDoc
             .getElementsByTagName(tagToMutate)
             [i].setAttribute(parameterToMutate, parameterValueInit);
@@ -105,13 +128,53 @@ async function parseXamlChanges(relativePath, file) {
             XMLS.serializeToString(xmlDoc.getElementsByTagName(tagToMutate)[i])
           );
         }
+        // For every instance of the desired tag 2, we'll edit the attribute
+        for (
+          let i = 0;
+          i < xmlDoc.getElementsByTagName(tagToMutate2).length;
+          i++
+        ) {
+          // Set the new attributes
+          xmlDoc
+            .getElementsByTagName(tagToMutate2)
+            [i].setAttribute(parameterToMutate, parameterValueInit);
+
+          // Log the tag that has been mutated
+          console.log(xmlDoc.getElementsByTagName(tagToMutate2)[i]);
+          logOutput(
+            XMLS.serializeToString(xmlDoc.getElementsByTagName(tagToMutate2)[i])
+          );
+        }
         // Then parse as a string
         fileString = XMLS.serializeToString(xmlDoc);
 
         // Update the file in the ZIP with the edited data
-        zip.file(file.name, "fileString");
+        zip.file(file.name, fileString);
 
         //console.log("async issue?");
+        //alert("mutateSingleXamlFile returning", zip);
+      });
+  } else if (right(file.name, 11) == "roject.json") {
+    zip
+      .file(file.name)
+      .async("string")
+      .then((fileString) => {
+        let fileAsJSON = JSON.parse(fileString);
+        // eg: "1.0.23"
+        let version = "" + fileAsJSON.projectVersion;
+        version = version.replace(".", "").replace(".", "");
+        version = version.slice(0, 6);
+        console.log(version);
+        let versionInt = parseInt(version) + 1;
+        //console.log(version);
+        version = "" + versionInt;
+        version = [version.slice(0, 1), ".", version.slice(1)].join("");
+        version = [version.slice(0, 3), ".", version.slice(3)].join("");
+        //console.log(version);
+        fileAsJSON.projectVersion = version;
+        fileString = JSON.stringify(fileAsJSON);
+        //console.log(fileString);
+        zip.file(file.name, fileString);
       });
   } else {
     // Do nothing
@@ -124,10 +187,25 @@ async function parseXamlChanges(relativePath, file) {
 function pressExport() {
   exportAll(zip, fname);
 }
-function exportAll(zip, fname) {
+
+function addZipToArray(zip, fname) {
+  zipArray.push(zip);
+  fnameArray.push(fname);
+  console.log("Added zip to array", zipArray, fnameArray);
+}
+
+// async function exportAll(zipArray, fnameArray) {
+//   for (let i = 0; i < zip.Array.length; i++) {
+//     zipArray[i].generateAsync({ type: "blob" }).then(function (content) {
+//       // see FileSaver.js
+//       saveAs(content, fnameArray[i]);
+//     });
+//   }
+// }
+async function exportAll(zip, fname) {
   zip.generateAsync({ type: "blob" }).then(function (content) {
     // see FileSaver.js
-    saveAs(content, fname); //Remove the .zip later
+    saveAs(content, fname);
   });
 }
 
