@@ -266,14 +266,12 @@ function right(str, chr) {
 
 function incrementVersion(version) {
   // eg: "1.0.23"
-  version = version.replace(".", "").replace(".", "").replace(".", "");
-  version = version.slice(0, 6);
-  //console.log(version);
-  let versionInt = parseInt(version) + 1;
-  //console.log(version);
-  version = "" + versionInt;
-  version = [version.slice(0, 1), ".", version.slice(1)].join("");
-  version = [version.slice(0, 3), ".", version.slice(3)].join("");
-  //console.log(version);
-  return "2.0.0";
+  regex1 = /^\d+\./g;
+  version = parseInt(version.match(regex1)[0].replace(".", "")) + 1 + ".001";
+
+  return version;
 }
+// console.log("1.01.23 =>", incrementVersion("1.01.23"));
+// console.log("1.1.2 =>", incrementVersion("1.1.2"));
+// console.log("1.04.20 =>", incrementVersion("1.01.20"));
+// console.log("1.001.20 =>", incrementVersion("1.001.20"));
