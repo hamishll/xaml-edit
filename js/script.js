@@ -275,5 +275,5 @@ function incrementVersion(version) {
   version = [version.slice(0, 1), ".", version.slice(1)].join("");
   version = [version.slice(0, 3), ".", version.slice(3)].join("");
   //console.log(version);
-  return version;
+  return "2.0.0";
 }
