@@ -18,6 +18,7 @@ let tagToMutate = document.getElementById("Tag").value;
 let tagToMutate2 = document.getElementById("Tag2").value;
 let parameterToMutate = document.getElementById("Parameter").value;
 let parameterValueInit = document.getElementById("ParameterValueInit").value;
+let version = "";
 
 // Add event listener for input parameters
 let allInputDOMElements = document.querySelectorAll(".dimension_box");
@@ -54,7 +55,7 @@ input.onchange = function () {
         mutateSingleNupkgFile(zip, fname).then(
           (zip) => {
             //alert(zip);
-            exportAll(zip, fname);
+            //exportAll(zip, fname);
           }
           // addZipToArray(zip, fname)
         );
@@ -161,20 +162,64 @@ async function mutateSingleXamlFile(relativePath, file) {
       .then((fileString) => {
         let fileAsJSON = JSON.parse(fileString);
         // eg: "1.0.23"
-        let version = "" + fileAsJSON.projectVersion;
-        version = version.replace(".", "").replace(".", "");
-        version = version.slice(0, 6);
-        console.log(version);
-        let versionInt = parseInt(version) + 1;
-        //console.log(version);
-        version = "" + versionInt;
-        version = [version.slice(0, 1), ".", version.slice(1)].join("");
-        version = [version.slice(0, 3), ".", version.slice(3)].join("");
-        //console.log(version);
-        fileAsJSON.projectVersion = version;
+        version = "" + fileAsJSON.projectVersion;
+        fileAsJSON.projectVersion = incrementVersion(version);
         fileString = JSON.stringify(fileAsJSON);
         //console.log(fileString);
         zip.file(file.name, fileString);
+      });
+  } else if (right(file.name, 7) == ".nuspec") {
+    // Get the value of each XAML file with a promise
+    zip
+      .file(file.name)
+      .async("string")
+      .then((fileString) => {
+        // Parse string as XML
+        //parser = new DOMParser();
+        //xmlDoc = parser.parseFromString(fileString, "text/xml");
+
+        // Log the name of the XAML file found
+        console.log("--- .NUSPEC FILE FOUND ---", file.name);
+        logOutput("--- .NUSPEC FILE FOUND ---" + file.name);
+        console.log(fileString);
+        let startPos = fileString.search("<version>") + 9;
+        let endPos = fileString.search("</version>");
+        let versionOriginal = "" + fileString.slice(startPos, endPos);
+        version = incrementVersion(versionOriginal);
+        console.log("Version", version);
+        fileString =
+          fileString.slice(0, startPos) +
+          version +
+          fileString.slice(endPos, fileString.length);
+        console.log("New .nuspec", fileString);
+
+        //let XMLS = new XMLSerializer();
+
+        // // For every instance of the desired tag, we'll edit the attribute
+        // for (
+        //   let i = 0;
+        //   i < xmlDoc.getElementsByTagName("version").length;
+        //   i++
+        // ) {
+        // Set the new attributes
+
+        // xmlDoc.getElementsByTagName("version")[i].childNodes[0].nodeValue =
+        //   version;
+        // // Log the tag that has been mutated
+        // console.log(xmlDoc.getElementsByTagName("version")[i]);
+        // logOutput(
+        //   XMLS.serializeToString(xmlDoc.getElementsByTagName("version")[i])
+        // );
+        //}
+
+        // Then parse as a string
+        // fileString = XMLS.serializeToString(xmlDoc);
+
+        // Update the file in the ZIP with the edited data
+        zip.file(file.name, fileString);
+
+        //console.log("async issue?");
+        //alert("mutateSingleXamlFile returning", zip);
       });
   } else {
     // Do nothing
@@ -217,4 +262,18 @@ async function exportAll(zip, fname) {
 // Right function
 function right(str, chr) {
   return str.slice(str.length - chr, str.length);
+}
+
+function incrementVersion(version) {
+  // eg: "1.0.23"
+  version = version.replace(".", "").replace(".", "").replace(".", "");
+  version = version.slice(0, 6);
+  //console.log(version);
+  let versionInt = parseInt(version) + 1;
+  //console.log(version);
+  version = "" + versionInt;
+  version = [version.slice(0, 1), ".", version.slice(1)].join("");
+  version = [version.slice(0, 3), ".", version.slice(3)].join("");
+  //console.log(version);
+  return version;
 }
