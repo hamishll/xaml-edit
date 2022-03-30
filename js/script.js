@@ -267,11 +267,11 @@ function right(str, chr) {
 function incrementVersion(version) {
   // eg: "1.0.23"
   regex1 = /^\d+\./g;
-  version = parseInt(version.match(regex1)[0].replace(".", "")) + 1 + ".001";
+  version = parseInt(version.match(regex1)[0].replace(".", "")) + 1 + ".01.001";
 
   return version;
 }
 // console.log("1.01.23 =>", incrementVersion("1.01.23"));
-// console.log("1.1.2 =>", incrementVersion("1.1.2"));
-// console.log("1.04.20 =>", incrementVersion("1.01.20"));
+// console.log("2.1.2 =>", incrementVersion("2.1.2"));
+// console.log("31.04.20 =>", incrementVersion("31.04.20"));
 // console.log("1.001.20 =>", incrementVersion("1.001.20"));
