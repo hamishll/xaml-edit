@@ -18,6 +18,8 @@ let tagToMutate = document.getElementById("Tag").value;
 let tagToMutate2 = document.getElementById("Tag2").value;
 let parameterToMutate = document.getElementById("Parameter").value;
 let parameterValueInit = document.getElementById("ParameterValueInit").value;
+let incrementVersionSetting =
+  document.getElementById("incrementVersion").checked;
 let version = "";
 
 // Add event listener for input parameters
@@ -25,6 +27,9 @@ let allInputDOMElements = document.querySelectorAll(".dimension_box");
 allInputDOMElements.forEach((item) =>
   item.addEventListener("keyup", getInputParameters)
 );
+document
+  .getElementById("incrementVersion")
+  .addEventListener("change", getInputParameters);
 
 // Update input parameters on event
 function getInputParameters() {
@@ -32,6 +37,7 @@ function getInputParameters() {
   tagToMutate2 = document.getElementById("Tag2").value;
   parameterToMutate = document.getElementById("Parameter").value;
   parameterValueInit = document.getElementById("ParameterValueInit").value;
+  incrementVersionSetting = document.getElementById("incrementVersion").checked;
 }
 
 let zip = new JSZip();
@@ -163,7 +169,10 @@ async function mutateSingleXamlFile(relativePath, file) {
         let fileAsJSON = JSON.parse(fileString);
         // eg: "1.0.23"
         version = "" + fileAsJSON.projectVersion;
-        fileAsJSON.projectVersion = incrementVersion(version);
+        fileAsJSON.projectVersion = incrementVersion(
+          version,
+          incrementVersionSetting
+        );
         fileString = JSON.stringify(fileAsJSON);
         //console.log(fileString);
         zip.file(file.name, fileString);
@@ -185,7 +194,7 @@ async function mutateSingleXamlFile(relativePath, file) {
         let startPos = fileString.search("<version>") + 9;
         let endPos = fileString.search("</version>");
         let versionOriginal = "" + fileString.slice(startPos, endPos);
-        version = incrementVersion(versionOriginal);
+        version = incrementVersion(versionOriginal, incrementVersionSetting);
         console.log("Version", version);
         fileString =
           fileString.slice(0, startPos) +
@@ -264,12 +273,18 @@ function right(str, chr) {
   return str.slice(str.length - chr, str.length);
 }
 
-function incrementVersion(version) {
-  // eg: "1.0.23"
-  regex1 = /^\d+\./g;
-  version = parseInt(version.match(regex1)[0].replace(".", "")) + 1 + ".01.001";
-
-  return version;
+function incrementVersion(version, incrementVersionSetting) {
+  if (incrementVersionSetting) {
+    // eg: "1.0.23"
+    regex1 = /^\d+\./g;
+    version =
+      parseInt(version.match(regex1)[0].replace(".", "")) + 1 + ".01.001";
+    console.log(incrementVersionSetting, "Updating version to: ", version);
+    return version;
+  } else {
+    console.log(incrementVersionSetting, "Keeping version as: ", version);
+    return version;
+  }
 }
 // console.log("1.01.23 =>", incrementVersion("1.01.23"));
 // console.log("2.1.2 =>", incrementVersion("2.1.2"));
