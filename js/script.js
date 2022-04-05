@@ -282,7 +282,13 @@ function incrementVersion(version, incrementVersionSetting) {
     console.log(incrementVersionSetting, "Updating version to: ", version);
     return version;
   } else {
-    console.log(incrementVersionSetting, "Keeping version as: ", version);
+    regex1 = /\d+$/g;
+    version = version.replace(regex1, parseInt(version.match(regex1)[0]) - 1);
+    console.log(
+      incrementVersionSetting,
+      "Deincrementing version as: ",
+      version
+    );
     return version;
   }
 }
